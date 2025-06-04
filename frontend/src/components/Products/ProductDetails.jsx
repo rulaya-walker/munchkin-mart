@@ -84,98 +84,6 @@ const similarProducts = [
         ]
     }
 ];
-
-const placeholderProducts = [
-    {
-        _id: 2,
-        name: "Placeholder Product 1",
-        price: 24.99,
-        images: [
-            {
-                url: "https://picsum.photos/200/200?random=1",
-                alt: "Product Image 1"
-            },
-
-        ]
-    },
-    {
-        _id: 3,
-        name: "Placeholder Product 2",  
-        price: 34.99,
-        images: [
-            {
-                url: "https://picsum.photos/200/200?random=2",
-                alt: "Product Image 2"
-            },
-        ]
-    },
-    {
-        _id: 4,
-        name: "Placeholder Product 3",
-        price: 19.99,
-        images: [   
-            {
-                url: "https://picsum.photos/200/200?random=3",
-                alt: "Product Image 3"
-            },
-        ]
-    },
-    {
-        _id: 5,
-        name: "Placeholder Product 4",
-        price: 39.99,
-        images: [
-            {
-                url: "https://picsum.photos/200/200?random=4",
-                alt: "Product Image 4"
-            },
-        ]
-    },
-    {
-        _id: 6,
-        name: "Placeholder Product 5",
-        price: 29.99,
-        images: [
-            {
-                url: "https://picsum.photos/200/200?random=5",
-                alt: "Product Image 5"
-            },
-        ]
-    },
-    {
-        _id: 7,
-        name: "Placeholder Product 6",
-        price: 49.99,
-        images: [
-            {
-                url: "https://picsum.photos/200/200?random=6",
-                alt: "Product Image 6"
-            },
-        ]
-    },
-    {
-        _id: 8,
-        name: "Placeholder Product 7",
-        price: 59.99,
-        images: [
-            {
-                url: "https://picsum.photos/200/200?random=7",
-                alt: "Product Image 7"
-            },
-        ]
-    },
-    {
-        _id: 9,
-        name: "Placeholder Product 8",
-        price: 69.99,
-        images: [
-            {
-                url: "https://picsum.photos/200/200?random=8",
-                alt: "Product Image 8"
-            },
-        ]
-    }
-];
 const ProductDetails = () => {
 const [selectedImage, setSelectedImage] = useState(selectedProduct.images[0].url);
 const [selectedSize, setSelectedSize] = useState("");
@@ -313,13 +221,6 @@ return (
                     You may also like
                 </h2>
                 <ProductGrid products={similarProducts} />
-            </div>
-
-             <div className="mt-20">
-                <h2 className="text-2xl text-capitalize text-center font-semibold text-gray-700 mb-4">
-                    Top Wears for Women
-                </h2>
-                <ProductGrid products={placeholderProducts} />
             </div>
         </div>
     </div>
