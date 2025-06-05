@@ -41,6 +41,6 @@ Website: https:/itwalker.com.np
    git clone https://github.com/yourusername/munchkin-mart.git
 
 **Install dependencies**
-cd munchkin-mart
-npm install
-npm run dev
+- cd munchkin-mart
+- npm install
+- npm run dev
