@@ -32,16 +32,16 @@ const Navbar = () => {
         </div>
         <div className="hidden md:flex space-x-4">
           <Link
-            to="/shop"
+            to="/collection/all"
             className="text-primary/90 uppercase text-sm hover:text-black"
           >
-            Shop
+            Men
           </Link>
           <Link
-            to="/about"
+            to="/collection/Women"
             className="text-primary/90 uppercase text-sm hover:text-black"
           >
-            About
+            Women
           </Link>
           <Link
             to="/contact"

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom';
 const MyOrderPage = () => {
     const [orders, setOrders] = useState([]); // Assuming you will fetch orders later
 useEffect(() => {
@@ -56,7 +57,10 @@ useEffect(() => {
                 <tbody>
                     {orders.map((order) => (
                         <tr key={order._id} className='bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600'>
-                            <td className='px-6 py-4 font-medium text-gray-900 dark:text-white'>#{order._id}</td>
+                            <td className='px-6 py-4 font-medium text-gray-900 dark:text-white'>
+                                
+                                <Link to={`/order/${order._id}`} className='text-blue-600 hover:underline'>#{order._id}</Link>
+                            </td>
                             <td className='px-6 py-4'>{new Date(order.createdAt).toLocaleDateString()}</td>
                             <td className='px-6 py-4'>{order.shippingAddress.city}, {order.shippingAddress.country}</td>
                             <td className='px-6 py-4'>
@@ -64,7 +68,7 @@ useEffect(() => {
                                     {order.orderItems.map((item, index) => (        
                                         <div key={index} className='flex items-center space-x-2'>
                                             <img src={item.image} alt={item.name} className='w-10 h-10 object-cover rounded' />
-                                            <span>{item.name}</span>
+                                            <Link to={`/product/${item._id}`} className='text-blue-600 hover:underline'>{item.name}</Link>
                                         </div>
                                     ))}
 

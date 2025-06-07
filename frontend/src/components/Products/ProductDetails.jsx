@@ -85,6 +85,7 @@ const similarProducts = [
     }
 ];
 const ProductDetails = () => {
+const [mainImage, setMainImage] = useState(selectedProduct.images[0].url);
 const [selectedImage, setSelectedImage] = useState(selectedProduct.images[0].url);
 const [selectedSize, setSelectedSize] = useState("");
 const [selectedColor, setSelectedColor] = useState("");
@@ -146,7 +147,8 @@ return (
                     <h1 className='text-2xl font-bold mb-4 text-gray-700'>{selectedProduct.name}</h1>
                     <p className='text-gray-700 mb-4'>{selectedProduct.description}</p>
                     <div className='flex items-center mb-4'>
-                        <span className='text-xl font-semibold text-gray-700'>${selectedProduct.price.toFixed(2)}</span>
+                       <del><span className='text-xl font-semibold text-gray-700'>${selectedProduct.price.toFixed(2)}</span></del>
+                             <span className='text-xl font-semibold text-gray-700'>${selectedProduct.price.toFixed(2)}</span>
                         <span className='ml-4 text-sm text-gray-500'>In Stock: {selectedProduct.stock}</span>
                     </div>
                     <div className='mb-4'>
