@@ -6,10 +6,15 @@ import { HiBars3BottomRight } from "react-icons/hi2"; // Importing the hamburger
 import { IoMdClose } from "react-icons/io";
 import SearchBar from "./SearchBar";
 import CartDrawer from "../Layout/CartDrawer";
+import { useSelector } from "react-redux";
+
 
 const Navbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+  const { cart } = useSelector((state) => state.cart);
+  const cartItemCount = cart?.products?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   const toggleNavDrawer = () => {
     setNavDrawerOpen(!navDrawerOpen);
@@ -32,16 +37,30 @@ const Navbar = () => {
         </div>
         <div className="hidden md:flex space-x-4">
           <Link
-            to="/collection/all"
+            to="/collection/all?gender=Men"
             className="text-primary/90 uppercase text-sm hover:text-black"
           >
             Men
           </Link>
           <Link
-            to="/collection/Women"
+            to="/collection/all?gender=Women"
             className="text-primary/90 uppercase text-sm hover:text-black"
           >
             Women
+          </Link>
+
+          <Link
+            to="/collection/all?category=Top Wear"
+            className="text-primary/90 uppercase text-sm hover:text-black"
+          >
+            Top Wear
+          </Link>
+
+          <Link
+            to="/collection/all?category=Bottom Wear"
+            className="text-primary/90 uppercase text-sm hover:text-black"
+          >
+            Bottom Wear
           </Link>
           <Link
             to="/contact"
@@ -54,13 +73,13 @@ const Navbar = () => {
           <Link to="/admin" className="bg-black text-white text-sm px-4 py-0.5 rounded hover:bg-gray-800">
             Admin
           </Link>
-          <Link to="/login" className="text-primary/90 hover:text-black">
+          <Link to="/profile" className="text-primary/90 hover:text-black">
             <HiOutlineUser className="h-5 w-5 inline-block" />
           </Link>
           <button onClick={toggleDrawer} className="relative text-primary/90 hover:text-black cursor-pointer">
             <HiOutlineShoppingCart className="h-5 w-5 inline-block" />
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-              0
+              {cartItemCount > 0 ? cartItemCount : 0}
             </span>
           </button>
           <div className="overflow-hidden">
@@ -82,10 +101,28 @@ const Navbar = () => {
           <h2 className="text-xl font-semibold text-gray-600">Menu</h2>
           <nav className="flex flex-col mt-4 space-y-">
             <Link
-              to="/shop"
+              to="/collection/all?gender=Men"
               className="text-primary/90 py-2 hover:text-secondary w-full "
             >
-              Shop
+              Men
+            </Link>
+            <Link
+              to="/collection/all?gender=Women"
+              className="text-primary/90 py-2 hover:text-secondary w-full "
+            >
+              Women
+            </Link>
+            <Link
+              to="/collection/all?category=Top Wear"
+              className="text-primary/90 py-2 hover:text-secondary w-full "
+            >
+              Top Wear
+            </Link>
+            <Link
+              to="/collection/all?category=Bottom Wear"
+              className="text-primary/90 py-2 hover:text-secondary w-full "
+            >
+              Bottom Wear
             </Link>
             <Link
               to="/about"

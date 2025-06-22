@@ -18,11 +18,8 @@ const FilterSidebar = () => {
   const [priceRange, setPriceRange] = useState([0, 100]);
 
   const categories = [
-    "Baby's Top Wear",
-    "Baby's Bottom Wear",
-    "Baby's Shoes",
-    "Baby's Accessories",
-    "Baby's Toys",
+    "Top Wear",
+    "Bottom Wear",
   ];
   const colors = [
     "Red",
@@ -32,10 +29,12 @@ const FilterSidebar = () => {
     "White",
   ];
   const sizes = [
-    "Small",
-    "Medium",
-    "Large",
-    "Extra Large"
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL",
   ];
   const materials = [
     "Cotton",
@@ -49,8 +48,8 @@ const FilterSidebar = () => {
     "Brand C",
   ];
   const genders = [
-    "Boys",
-    "Girls",
+    "Men",
+    "Women",
     "Unisex",
   ];
 

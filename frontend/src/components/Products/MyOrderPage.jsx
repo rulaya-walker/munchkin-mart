@@ -1,43 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { fetchUserOrders } from '../../redux/slices/orderSlice';
 const MyOrderPage = () => {
-    const [orders, setOrders] = useState([]); // Assuming you will fetch orders later
-useEffect(() => {
-    // Fetch orders from API or state management
-    // const fetchOrders = async () => {
-    //     // Simulate API call
-    //     const response = await fetch('/api/orders');
-    //     const data = await response.json();
-    //     setOrders(data);
-    // };
-    // fetchOrders();
-    setTimeout(() => {
-        const mockOrders = [
-            { _id: "1234", createdAt:new Date(),shippingAddress:{city:'New York',country:'Nepal'}, orderItems:[{
-                name: 'Product 1', image: 'https://picsum.photos/200/200?random=1'
-            }], quantity: 2, totalPrice: 50,
-        isPaid:true
-        },
-            { _id: "1235", createdAt:new Date(),shippingAddress:{city:'Kathmandu',country:'Nepal'}, orderItems:[{
-                name: 'Product 2', image: 'https://picsum.photos/200/200?random=2'
-            }], quantity: 1, totalPrice: 30,
-        isPaid:false
-        },
-            { _id: "1236", createdAt:new Date(),shippingAddress:{city:'Pokhara',country:'Nepal'}, orderItems:[{
-                name: 'Product 3', image: 'https://picsum.photos/200/200?random=3'
-            }], quantity: 3, totalPrice: 75,
-        isPaid:true
-        },
-        {
-            _id: "1237", createdAt:new Date(),shippingAddress:{city:'Lalitpur',country:'Nepal'}, orderItems:[{
-                name: 'Product 4', image: 'https://picsum.photos/200/200?random=4'
-            }], quantity: 1, totalPrice: 20,
-        isPaid:false
-        }
-        ];
-        setOrders(mockOrders);
-    }, 1000);
-}, []);
+   //const [orders, setOrders] = useState([]); // Assuming you will fetch orders later
+   const dispatch = useDispatch();
+   const { orders } = useSelector((state) => state.orders); // Assuming you have an order slice in your Redux store
+
   return (
     <div className='container mx-auto p-4 sm:p-6'>
         <h2 className='text-xl sm:text-2xl font-bold mb-6'>My Orders</h2>

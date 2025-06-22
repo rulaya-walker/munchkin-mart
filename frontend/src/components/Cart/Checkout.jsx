@@ -1,68 +1,59 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import PaypalButton from "./PaypalButton";
+import { useDispatch, useSelector } from "react-redux";
+import { createCheckout } from "../../redux/slices/checkoutSlice";
+import { toast } from "sonner";
+import { axiosTokenInstance } from "../../axios/axiosInstance";
 
 const Checkout = () => {
     const navigate = useNavigate();
     const [checkoutId, setCheckoutId] = useState(null);
-    const cart = {
-        products: [
-            {
-                _id: 1,
-                name: "Sample Product",
-                price: 29.99,
-                quantity: 2,
-                size: "M",
-                color: "Red",
-                images: "https://picsum.photos/200/200?random=1"
-            },
-            {
-                _id: 2,
-                name: "Another Product",
-                price: 19.99,
-                quantity: 1,
-                size: "L",
-                color: "Blue",
-                images: "https://picsum.photos/200/200?random=2"
-            }
-        ],
-        total: 79.97,
-    }
     const [shippingAddress, setShippingAddress] = useState({
-        fName: "",
-        lName: "",
-        address: "",
-        city: "",
-        state: "",
-        zip: "",
-        country: "",
-        phone: ""
+        fName: '',
+        lName: '',
+        address: '',
+        city: '',
+        state: '',
+        zip: '',
+        country: '',
+        phone: ''
     });
+   const dispatch = useDispatch();
+   const {cart,loading,error} = useSelector((state) => state.cart);
+   const {user} = useSelector((state) => state.auth);
+
+   //Ensure cart is loaded before proceeding and user is logged in
+   useEffect(() => {
+        // Check if user is logged in
+        if (!user || !user._id) {
+            console.log("User not logged in, redirecting to login page");
+            navigate('/login?redirect=/checkout');
+            return;
+        }
+        
+        // Check if cart has items
+        if(!cart || !cart.products || cart.products.length === 0) {
+            console.log("Cart is empty, redirecting to cart page");
+        }
+    }, [cart, navigate, user]);
+
     const handleCreateCheckout = async (e) => {
         e.preventDefault();
-        setCheckoutId(123); // Simulate checkout ID for demonstration
-        // try {
-        //     const response = await fetch('/api/checkout', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             cart,
-        //             shippingAddress
-        //         }),
-        //     });
+        if(cart && cart.products.length > 0) {
+            const res = await dispatch(createCheckout({
+               checkoutItems: cart.products,
+                shippingAddress,
+                paymentMethod:'PayPal',
+                totalPrice: cart.totalPrice 
+            }));
+            console.log("Checkout response:", res.payload._id);
 
-        //     if (!response.ok) {
-        //         throw new Error('Failed to create checkout session');
-        //     }
-
-        //     const data = await response.json();
-        //     setCheckoutId(data.checkoutId);
-        //     navigate(`/checkout/${data.checkoutId}`);
-        // } catch (error) {
-        //     console.error('Error during checkout:', error);
-        // }
+            if(res.payload && res.payload._id) {
+                setCheckoutId(res.payload._id);
+            }
+        }
+        
     };
     const handlePaypalCheckout = () => {
         // Simulate PayPal checkout process
@@ -70,19 +61,101 @@ const Checkout = () => {
         // Here you would typically redirect to PayPal's payment page or integrate with their SDK
     };
 
-    const handlePaymentSuccess = (details) => {
-        console.log("Payment successful:", details);
+    const handlePaymentSuccess = async (details) => {
         // Handle successful payment, e.g., update order status, redirect to confirmation page
-        navigate('/order-confirmation');
+        try {
+            console.log("Payment successful, processing payment for checkout:", checkoutId);
+            console.log("PayPal details:", details);
+            
+            if (!checkoutId) {
+                toast.error("Checkout ID is missing. Please try again.");
+                return;
+            }
+            
+            const response = await axiosTokenInstance.put(`/api/checkout/${checkoutId}/pay`, {
+                paymentStatus: 'Paid',
+                paymentDetails: {
+                    id: details.id,
+                    status: details.status,
+                    payer: details.payer,
+                    create_time: details.create_time,
+                    update_time: details.update_time
+                },
+            });
+            
+            console.log("Payment response from server:", response.data);
+            
+            if (response.status === 200) {
+                toast.success("Payment successful!");
+                await handleFinalizeCheckout(checkoutId);
+            } else {
+                toast.error("Payment verification failed. Please try again.");
+                return;
+            }  
+        } catch (error) {
+            console.error("Payment processing failed:", error.response?.data || error.message);
+            toast.error("Payment processing failed. Please try again.");
+            return;
+        }
     };
+
+    const handleFinalizeCheckout = async (checkoutId) => {
+        try {
+            console.log("Finalizing checkout:", checkoutId);
+            
+            if (!checkoutId) {
+                toast.error("Checkout ID is missing. Cannot finalize checkout.");
+                return false;
+            }
+            
+            const response = await axiosTokenInstance.post(`/api/checkout/${checkoutId}/finalize`, {
+                shippingAddress,
+                paymentMethod: 'PayPal',
+                totalPrice: cart.totalPrice,
+            });
+            
+            console.log("Finalize checkout response:", response.status);
+
+            if (response.status == 200) {
+                toast.success("Order completed successfully!");
+                navigate('/order-confirmation');
+                return true;
+            } else {
+                toast.error("Failed to finalize checkout. Please try again.");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error finalizing checkout:", error.response?.data || error.message);
+            toast.error("Error finalizing checkout. Please try again.");
+            return false;
+        }
+    };
+
+if(loading) {
+    return <div className="text-center text-gray-700">Loading checkout...</div>;
+}
+if(error) {
+    return <div className="text-center text-red-500">Error loading checkout: {error}</div>;
+}
+if(!cart || !cart.products || cart.products.length === 0) {
+    return <div className="text-center text-gray-700">Your cart is empty. Please add items to your cart before proceeding to checkout.</div>;
+}
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto py-10 px-6 tracking-tighter">
         {/* Left Section  */}
        <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-6">Checkout</h2>
-            <form onClick={handleCreateCheckout} className="space-y-6">
+            <form onSubmit={handleCreateCheckout} className="space-y-6">
             <h3 className="text-lg font-semibold mb-4">Shipping Address</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="md:col-span-2">
+                    <label className="block text-sm font-medium mb-2" htmlFor="address">Address</label>
+                    <input
+                        type="email"
+                        value={user? user.email :""}
+                        className="border border-gray-300 p-2 rounded-lg w-full" disabled
+                    />
+                </div>
                 <div>
                     <label className="block text-sm font-medium mb-2" htmlFor="fname">First Name</label>
                     <input
@@ -171,7 +244,14 @@ const Checkout = () => {
                 </button> : (
                     <div>
                        <h3 className="text-2xl mb-2">Pay with Paypal</h3>
-                        <PaypalButton amount={100} onSuccess={handlePaymentSuccess} onError={(err)=>alert("Payment failed, try again")}/>
+                        <PaypalButton 
+                            amount={cart.totalPrice} 
+                            onSuccess={handlePaymentSuccess} 
+                            onError={(err) => {
+                                console.error("PayPal payment error:", err);
+                                toast.error("Payment failed. Please try again.");
+                            }}
+                        />
                     </div>
                 )}
             </div>
@@ -183,7 +263,7 @@ const Checkout = () => {
                 {cart.products.map((product) => (
                     <div key={product._id} className="flex items-center justify-between mb-2">
                         <div className="flex items-center">
-                            <img src={product.images} alt={product.name} className="w-16 h-16 object-cover rounded mr-4" />
+                            <img src={product.image} alt={product.name} className="w-16 h-16 object-cover rounded mr-4" />
                             <div>
                                 <h4 className="text-sm font-medium">{product.name}</h4>
                                 <p className="text-sm text-gray-600">Quantity: {product.quantity}</p>
@@ -195,9 +275,9 @@ const Checkout = () => {
                     </div>
                 ))}
             </div>
-            <div className="flex justify-between items-center border-t border-gray-300 pt-4">
+            <div className="flex justify-between items-center text-lg mt-4">
                 <span className="">Sub Total</span>
-                <span className="">${cart.total.toFixed(2)}</span>
+                <span className="">${cart.totalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center text-lg mt-4">
                 <span className="">Shipping</span>
@@ -205,7 +285,7 @@ const Checkout = () => {
             </div>
             <div className="flex justify-between items-center text-lg border-t border-gray-300 mt-4 pt-4">
                 <span className="text-lg font-semibold">Total</span>
-                <span className="text-lg font-semibold">${cart.total.toFixed(2)}</span>
+                <span className="text-lg font-semibold">${cart.totalPrice.toFixed(2)}</span>
             </div>
        </div>
     </div>

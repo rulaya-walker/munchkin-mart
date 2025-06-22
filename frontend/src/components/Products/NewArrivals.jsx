@@ -1,92 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { FaAngleRight,FaAngleLeft } from "react-icons/fa6";
+import { axiosInstance } from "../../axios/axiosInstance";
 
 const NewArrivals = () => {
-    const scrollRef  = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(true);
-  const products = [
-    {
-      _id: 1,
-      name: "Product 1",
-      price: 29.99,
-      images: [
-        {
-          url: "https://picsum.photos/500/500?random=1",
-          alt: "Product 1 Image",
-        },
-      ],
-    },
-    {
-      _id: 2,
-      name: "Product 2",
-      price: 39.99,
-      images: [
-        {
-          url: "https://picsum.photos/500/500?random=2",
-          alt: "Product 2 Image",
-        },
-      ],
-    },
-    {
-      _id: 3,
-      name: "Product 3",
-      price: 49.99,
-      images: [
-        {
-          url: "https://picsum.photos/500/500?random=3",
-          alt: "Product 3 Image",
-        },
-      ],
-    },
-    {
-      _id: 4,
-      name: "Product 4",
-      price: 59.99,
-      images: [
-        {
-          url: "https://picsum.photos/500/500?random=4",
-          alt: "Product 4 Image",
-        },
-      ],
-    },
-    {
-      _id: 5,
-      name: "Product 5",
-      price: 69.99,
-      images: [
-        {
-          url: "https://picsum.photos/500/500?random=5",
-          alt: "Product 5 Image",
-        },
-      ],
-    },
-    {
-      _id: 6,
-      name: "Product 6",
-      price: 79.99,
-      images: [
-        {
-          url: "https://picsum.photos/500/500?random=6",
-          alt: "Product 6 Image",
-        },
-      ],
-    },
-    {
-      _id: 7,
-      name: "Product 7",
-      price: 89.99,
-      images: [
-        {
-          url: "https://picsum.photos/500/500?random=7",
-          alt: "Product 7 Image",
-        },
-      ],
-    },
-  ];
+  const scrollRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        const fetchNewArrivals = async () => {
+          try{
+            const response = await axiosInstance.get("/api/products/new-arrivals");
+            setProducts(response.data.products);
+          }catch (error) {
+            console.error("Error fetching new arrivals:", error);
+          }
+        };
+        fetchNewArrivals();
+
+    }, []);
+
     const handleMouseDown = (e) => {    
     setIsDragging(true);
     setStartX(e.pageX - scrollRef.current.offsetLeft);
@@ -136,10 +73,9 @@ const updateScrollButton = () => {
           container.removeEventListener("scroll", updateScrollButton);
         };
     }
-}, []);
-
+}, [products]);
   return (
-    <section className="py-16 px-4 lg:px-0">
+    <section id="newarrival" className="py-16 px-4 lg:px-0">
       <div className="container mx-auto text-center mb-10 relative">
         <h2 className="text-3xl font-bold mb-4">Explore New Arrivals</h2>
         <p className="text-gray-600 text-lg mb-14">

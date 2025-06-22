@@ -1,14 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import { FaFilter } from "react-icons/fa6";
 import FilterSidebar from "../components/Products/FilterSidebar";
 import SortOptions from "../components/Products/SortOptions";
 import ProductGrid from "../components/Products/ProductGrid";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProductsByCollection } from "../redux/slices/productSlice";
 
 const Collection = () => {
-  const [products, setProducts] = useState([]);
+  const {collection} = useParams();
+  const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const {products, loading, error} = useSelector((state) => state.products);
+  const queryParams = Object.fromEntries([...searchParams]);
   const sidebarRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    dispatch(fetchProductsByCollection({
+      collection,
+      ...queryParams,
+    }));
+  }, [dispatch, collection, searchParams]);
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -25,103 +38,6 @@ const Collection = () => {
         document.removeEventListener("mousedown", handleClickOutside);
       };
   },[]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      const fetchProducts = [
-        {
-          _id: 2,
-          name: "Placeholder Product 1",
-          price: 24.99,
-          images: [
-            {
-              url: "https://picsum.photos/200/200?random=1",
-              alt: "Product Image 1",
-            },
-          ],
-        },
-        {
-          _id: 3,
-          name: "Placeholder Product 2",
-          price: 34.99,
-          images: [
-            {
-              url: "https://picsum.photos/200/200?random=2",
-              alt: "Product Image 2",
-            },
-          ],
-        },
-        {
-          _id: 4,
-          name: "Placeholder Product 3",
-          price: 19.99,
-          images: [
-            {
-              url: "https://picsum.photos/200/200?random=3",
-              alt: "Product Image 3",
-            },
-          ],
-        },
-        {
-          _id: 5,
-          name: "Placeholder Product 4",
-          price: 39.99,
-          images: [
-            {
-              url: "https://picsum.photos/200/200?random=4",
-              alt: "Product Image 4",
-            },
-          ],
-        },
-        {
-          _id: 6,
-          name: "Placeholder Product 5",
-          price: 29.99,
-          images: [
-            {
-              url: "https://picsum.photos/200/200?random=5",
-              alt: "Product Image 5",
-            },
-          ],
-        },
-        {
-          _id: 7,
-          name: "Placeholder Product 6",
-          price: 49.99,
-          images: [
-            {
-              url: "https://picsum.photos/200/200?random=6",
-              alt: "Product Image 6",
-            },
-          ],
-        },
-        {
-          _id: 8,
-          name: "Placeholder Product 7",
-          price: 59.99,
-          images: [
-            {
-              url: "https://picsum.photos/200/200?random=7",
-              alt: "Product Image 7",
-            },
-          ],
-        },
-        {
-          _id: 9,
-          name: "Placeholder Product 8",
-          price: 69.99,
-          images: [
-            {
-              url: "https://picsum.photos/200/200?random=8",
-              alt: "Product Image 8",
-            },
-          ],
-        },
-      ];
-      setProducts(fetchProducts);
-    }, 1000);
-  }, []);
-
   return <div className="flex flex-col lg:flex-row">
     {/* Mobile Filter Button */}
     <button onClick={toggleSidebar} className="lg:hidden border p-2 flex justify-center items-center cursor-pointer">
@@ -136,7 +52,7 @@ const Collection = () => {
       {/* Sort Options */}
       <SortOptions />
         {/* Product Grid */}    
-        <ProductGrid products={products} />
+        <ProductGrid products={products} loading={loading} error={error} />
     </div>
   </div>;
 };

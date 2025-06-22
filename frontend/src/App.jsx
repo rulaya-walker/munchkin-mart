@@ -18,16 +18,21 @@ import UserManagement from './components/Admin/UserManagement'
 import ProductManagement from './components/Admin/ProductManagement'
 import EditProduct from './components/Admin/EditProduct'
 import Orders from './components/Admin/Orders'
+import {Provider} from 'react-redux'
+import store from './redux/store'
+import NetworkStatus from './components/Common/NetworkStatus'
 
 const App = () => {
   return (
-    <BrowserRouter>
-    <Toaster position='top-right' richColors closeButton />
-      <Routes>
-        <Route path="/" element={<UserLayout />}>
-          <Route index element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <Provider store={store}>
+      <BrowserRouter>
+        <Toaster position='top-right' richColors closeButton />
+        <NetworkStatus />
+        <Routes>
+          <Route path="/" element={<UserLayout />}>
+            <Route index element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/collection/:collection" element={<Collection />} />
           <Route path="/product/:id" element={<ProductDetails />} />
@@ -45,6 +50,7 @@ const App = () => {
         </Route>
       </Routes>
     </BrowserRouter>
+    </Provider>
   )
 }
 

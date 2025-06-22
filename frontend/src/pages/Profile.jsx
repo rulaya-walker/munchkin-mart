@@ -1,6 +1,26 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import MyOrderPage from '../components/Products/MyOrderPage'
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../redux/slices/authSlice';
+import { clearCart } from '../redux/slices/cartSlice';
 const Profile = () => {
+  const {user} = useSelector((state) => state.auth);
+  const navigate =useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if(!user) {
+      navigate('/login');
+    }
+  }, [user, navigate, dispatch]);
+
+  const handleLgout = () => {
+    // Implement logout functionality here
+    dispatch(logout());
+    dispatch(clearCart());
+    navigate('/login');
+  }
   return (
     <div className='min-h-screen flex flex-col'>
       <div className='flex-grow container mx-auto p-4 md:p-6'>
@@ -12,9 +32,9 @@ const Profile = () => {
                     
                     <div className='flex flex-col items-center'>
                         <img src='https://picsum.photos/100' alt='User Avatar' className='w-12 h-12 rounded-full object-cover' />
-                        <h3 className='text-lg font-medium'>John Doe</h3>
-                        <p className='text-gray-600 mb-2'>johndoe@example.com</p>
-                        <button className='w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600'>Logout</button>
+                        <h3 className='text-lg font-medium'>{user?.name}</h3>
+                        <p className='text-gray-600 mb-2'>{user?.email}</p>
+                        <button onClick={handleLgout} className='w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 cursor-pointer'>Logout</button>
                     </div>
                 </div>
             </div>

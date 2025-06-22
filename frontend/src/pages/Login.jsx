@@ -1,29 +1,79 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logo from '../assets/logo.png' // Assuming you have a logo image
 import login from '../assets/login.webp' // Assuming you have a login image
+import { loginUser } from '../redux/slices/authSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { mergeCarts } from '../redux/slices/cartSlice'
+import { toast } from 'sonner'
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log('Login details:', { email, password });
-    // You can add your API call here to log in the user    
-    // Reset form fields
-    setEmail('');
-    setPassword('');
+    const dispatch = useDispatch();
 
-};
-  return (
-    <div className='flex'>
-        <div className='w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-12'>
-            <form className='w-full max-w-md bg-white p-8 rounded-lg border shadow-sm'>
-                <div className='flex flex-row justify-center mb-6'>
-                    <img src={logo} alt='Logo' className='w-full rounded-lg' />
+    const navigate = useNavigate();
+    const location = useLocation();
 
-                </div>
+    const { user, guestId, loading, error } = useSelector((state) => state.auth);
+    const { cart } = useSelector((state) => state.cart);
+
+    const redirect = new URLSearchParams(location.search).get('redirect') || '/';
+    const isCheckoutRedirect = redirect.includes('checkout');
+
+    useEffect(() => {
+      if(user){
+        const hasCartProducts = cart && cart.products && cart.products.length > 0;
+        if(hasCartProducts && guestId){
+            dispatch(mergeCarts({guestId, user}))
+                .unwrap()
+                .then(() => {
+                    navigate(isCheckoutRedirect ? '/checkout' : "/");
+                })
+                .catch(error => {
+                    console.error("Error merging carts:", error);
+                    // Still navigate even if cart merging fails
+                    navigate(isCheckoutRedirect ? '/checkout' : "/");
+                });
+        } else {
+            navigate(isCheckoutRedirect ? '/checkout' : "/");
+        }
+      }  
+    }, [user, cart, guestId, isCheckoutRedirect, dispatch, navigate]);
+    
+    // Show errors from auth state
+    useEffect(() => {
+        if (error) {
+            toast.error(typeof error === 'string' ? error : 'Login failed. Please try again.');
+        }
+    }, [error]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!email || !password) {
+            toast.error('Please enter both email and password');
+            return;
+        }
+
+        try {
+            await dispatch(loginUser({ email, password })).unwrap();
+            // Reset form fields on success
+            setEmail('');
+            setPassword('');
+        } catch (err) {
+            console.error('Login error:', err);
+            // Error will be handled by the useEffect above
+        }
+    };
+    return (
+        <div className='flex'>
+            <div className='w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-12'>
+                <form onSubmit={handleSubmit} className='w-full max-w-md bg-white p-8 rounded-lg border shadow-sm'>
+                    <div className='flex flex-row justify-center mb-6'>
+                        <img src={logo} alt='Logo' className='w-full rounded-lg' />
+
+                    </div>
                 <h2 className='text-2xl font-bold text-gray-800 text-center'>Hey There!</h2>
                 <p className='text-center mb-6'>Enter your username and password to login</p>
                 <div className='mb-4'>
@@ -48,9 +98,15 @@ const handleSubmit = (e) => {
                         required
                     />
                 </div>
-                <button onClick={handleSubmit} type='submit' className='w-full bg-primary text-white p-2 rounded-md'>Login</button>
+                <button 
+                    type='submit' 
+                    className='w-full bg-primary text-white p-2 rounded-md cursor-pointer'
+                    disabled={loading}
+                >
+                    {loading ? 'Logging in...' : 'Login'}
+                </button>
                 <p className='text-center mt-4'>
-                    Don't have an account? <Link to='/register' className='text-primary'>Register</Link>
+                    Don't have an account? <Link to={`/register?redirect=${encodeURIComponent(redirect)}`} className='text-primary'>Register</Link>
                     </p>
             </form>
         </div>

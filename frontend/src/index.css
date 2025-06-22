@@ -11,3 +11,7 @@
   --color-primary: #2a3167;
   --color-secondary: #fbce57;
 }
+
+#newarrival ::-webkit-scrollbar{
+    display: none;
+}
