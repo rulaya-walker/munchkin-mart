@@ -19,7 +19,6 @@ export const fetchProductsByCollection = createAsyncThunk(
     if (limit) query.append('limit', limit);
 
     try {
-      console.log(`Fetching products from: /api/products?${query.toString()}`);
       const response = await axiosInstance.get(`/api/products?${query.toString()}`);
       if (response.status !== 200) {
         throw new Error(response.data.message || 'Failed to fetch products');
@@ -27,7 +26,6 @@ export const fetchProductsByCollection = createAsyncThunk(
 
       return response.data.products;
     } catch (error) {
-      console.error('Error fetching products:', error);
       if (error.code === 'ECONNABORTED') {
         return rejectWithValue('Request timed out. Please try again.');
       }
@@ -44,16 +42,14 @@ export const fetchProductById = createAsyncThunk(
   'products/fetchById',
   async (productId, {rejectWithValue}) => {
     try {
-      console.log(`Fetching product details for ID: ${productId}`);
       const response = await axiosInstance.get(`/api/products/${productId}`);
 
       if (response.status !== 200) {
         throw new Error(response.data.message || 'Failed to fetch product details');
       }
-
-      return response.data.product;
+      console.log(response.data, productId);
+      return response.data;
     } catch (error) {
-      console.error('Error fetching product details:', error);
       if (error.code === 'ECONNABORTED') {
         return rejectWithValue('Request timed out. Please try again.');
       }
@@ -69,7 +65,7 @@ export const updateProduct = createAsyncThunk(
   'products/updateProduct',
   async ({productId, productData}, {rejectWithValue}) => {
     try {
-      const response = await axiosTokenInstance.put(`/api/products/${productId}`, productData);
+      const response = await axiosTokenInstance.put(`/api/admin/products/${productId}`, productData);
 
       if (response.status !== 200) {
         throw new Error(response.data.message);
@@ -169,7 +165,9 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         state.loading = false;
+        console.log("Fetched product:", action.payload);
         state.product = action.payload;
+
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.loading = false;

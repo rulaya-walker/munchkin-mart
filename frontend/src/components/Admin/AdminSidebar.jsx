@@ -3,11 +3,17 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import logo from '../../assets/logo.png' // Adjust the path as necessary
 import { FaBoxOpen, FaClipboardList, FaStore, FaUser } from 'react-icons/fa6'
 import { FaSignOutAlt } from "react-icons/fa";
+import { useDispatch } from 'react-redux';
+import { logout } from '../../redux/slices/authSlice';
+import { resetCart } from '../../redux/slices/cartSlice';
 const AdminSidebar = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleLogout = () => {
     // Perform logout logic here
     // For example, clear user data and redirect to login page
+    dispatch(logout());
+    dispatch(resetCart());
     navigate('/');
   }
   return (

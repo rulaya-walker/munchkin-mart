@@ -22,50 +22,49 @@ const Checkout = () => {
    const dispatch = useDispatch();
    const {cart,loading,error} = useSelector((state) => state.cart);
    const {user} = useSelector((state) => state.auth);
-
    //Ensure cart is loaded before proceeding and user is logged in
    useEffect(() => {
-        // Check if user is logged in
-        if (!user || !user._id) {
-            console.log("User not logged in, redirecting to login page");
-            navigate('/login?redirect=/checkout');
-            return;
-        }
-        
         // Check if cart has items
         if(!cart || !cart.products || cart.products.length === 0) {
-            console.log("Cart is empty, redirecting to cart page");
+            navigate('/');
         }
-    }, [cart, navigate, user]);
+    }, [cart, navigate]);
 
     const handleCreateCheckout = async (e) => {
         e.preventDefault();
-        if(cart && cart.products.length > 0) {
-            const res = await dispatch(createCheckout({
-               checkoutItems: cart.products,
-                shippingAddress,
-                paymentMethod:'PayPal',
-                totalPrice: cart.totalPrice 
-            }));
-            console.log("Checkout response:", res.payload._id);
-
-            if(res.payload && res.payload._id) {
-                setCheckoutId(res.payload._id);
-            }
+        
+        // Basic validation
+        if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.state || 
+            !shippingAddress.zip || !shippingAddress.country || !shippingAddress.phone) {
+            toast.error("Please fill in all required shipping information");
+            return;
         }
         
-    };
-    const handlePaypalCheckout = () => {
-        // Simulate PayPal checkout process
-        console.log("Redirecting to PayPal for checkout...");
-        // Here you would typically redirect to PayPal's payment page or integrate with their SDK
+        if(cart && cart.products.length > 0) {
+            try {
+                const res = await dispatch(createCheckout({
+                    checkoutItems: cart.products,
+                    shippingAddress,
+                    paymentMethod: 'PayPal',
+                    totalPrice: cart.totalPrice 
+                })).unwrap();
+
+                if (res && res._id) {
+                    setCheckoutId(res._id);
+                    toast.success("Checkout created successfully");
+                }
+            } catch (error) {
+                console.error("Checkout creation failed:", error);
+                toast.error(error.message || "Failed to create checkout. Please try again.");
+            }
+        } else {
+            toast.error("Your cart is empty. Add items to proceed.");
+        }
     };
 
     const handlePaymentSuccess = async (details) => {
         // Handle successful payment, e.g., update order status, redirect to confirmation page
         try {
-            console.log("Payment successful, processing payment for checkout:", checkoutId);
-            console.log("PayPal details:", details);
             
             if (!checkoutId) {
                 toast.error("Checkout ID is missing. Please try again.");
@@ -74,24 +73,12 @@ const Checkout = () => {
             
             const response = await axiosTokenInstance.put(`/api/checkout/${checkoutId}/pay`, {
                 paymentStatus: 'Paid',
-                paymentDetails: {
-                    id: details.id,
-                    status: details.status,
-                    payer: details.payer,
-                    create_time: details.create_time,
-                    update_time: details.update_time
-                },
+                paymentDetails: details,
             });
             
-            console.log("Payment response from server:", response.data);
-            
-            if (response.status === 200) {
-                toast.success("Payment successful!");
-                await handleFinalizeCheckout(checkoutId);
-            } else {
-                toast.error("Payment verification failed. Please try again.");
-                return;
-            }  
+     
+        await handleFinalizeCheckout(checkoutId);
+   
         } catch (error) {
             console.error("Payment processing failed:", error.response?.data || error.message);
             toast.error("Payment processing failed. Please try again.");
@@ -100,9 +87,7 @@ const Checkout = () => {
     };
 
     const handleFinalizeCheckout = async (checkoutId) => {
-        try {
-            console.log("Finalizing checkout:", checkoutId);
-            
+        try {  
             if (!checkoutId) {
                 toast.error("Checkout ID is missing. Cannot finalize checkout.");
                 return false;
@@ -114,16 +99,8 @@ const Checkout = () => {
                 totalPrice: cart.totalPrice,
             });
             
-            console.log("Finalize checkout response:", response.status);
-
-            if (response.status == 200) {
-                toast.success("Order completed successfully!");
                 navigate('/order-confirmation');
-                return true;
-            } else {
-                toast.error("Failed to finalize checkout. Please try again.");
-                return false;
-            }
+   
         } catch (error) {
             console.error("Error finalizing checkout:", error.response?.data || error.message);
             toast.error("Error finalizing checkout. Please try again.");
@@ -177,40 +154,44 @@ if(!cart || !cart.products || cart.products.length === 0) {
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-2" htmlFor="address">Address</label>
+                    <label className="block text-sm font-medium mb-2" htmlFor="address">Address <span className="text-red-500">*</span></label>
                     <input
                         type="text"
                         id="address"
+                        required
                         value={shippingAddress.address}
                         onChange={(e) => setShippingAddress({ ...shippingAddress, address: e.target.value })}
                         className="border border-gray-300 p-2 rounded-lg w-full"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium mb-2" htmlFor="city">City</label>
+                    <label className="block text-sm font-medium mb-2" htmlFor="city">City <span className="text-red-500">*</span></label>
                     <input
                         type="text"
                         id="city"
+                        required
                         value={shippingAddress.city}
                         onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                         className="border border-gray-300 p-2 rounded-lg w-full"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium mb-2" htmlFor="state">State</label>
+                    <label className="block text-sm font-medium mb-2" htmlFor="state">State <span className="text-red-500">*</span></label>
                     <input
                         type="text"
                         id="state"
+                        required
                         value={shippingAddress.state}
                         onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
                         className="border border-gray-300 p-2 rounded-lg w-full"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium mb-2" htmlFor="zip">ZIP Code</label>
+                    <label className="block text-sm font-medium mb-2" htmlFor="zip">ZIP Code <span className="text-red-500">*</span></label>
                     <input
                         type="text"
                         id="zip"
+                        required
                         value={shippingAddress.zip}
                         onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
                         className="border border-gray-300 p-2 rounded-lg w-full"

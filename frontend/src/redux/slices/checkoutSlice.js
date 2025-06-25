@@ -7,10 +7,12 @@ export const createCheckout = createAsyncThunk(
     try {
       const response = await axiosTokenInstance.post("/api/checkout", checkoutData);
 
-      if (response.status !== 201) {
+      console.log("Checkout response:", response.data);
+      if (response.status !== 200 && response.status !== 201) {
         throw new Error(response.data.message);
       }
       return response.data;
+      
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: error.message });
     }

@@ -26,11 +26,11 @@ export const fetchOrderById = createAsyncThunk(
 );
 
 const orderSlice = createSlice({
-  name: "order",
+  name: "orders",
   initialState: {
     orders: [],
     totalOrders: 0,
-    order: null,
+    orderDetails: null,
     loading: false,
     error: null,
   },
@@ -55,7 +55,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderById.fulfilled, (state, action) => {
         state.loading = false;
-        state.order = action.payload;
+        state.orderDetails = action.payload;
       })
       .addCase(fetchOrderById.rejected, (state, action) => {
         state.loading = false;

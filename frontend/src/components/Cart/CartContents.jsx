@@ -64,43 +64,10 @@ const CartContents = ({cart, userId, guestId}) => {
     });
   }, [localCart, dispatch, guestId, userId, cartState.cart]);
 
-  const handleRemoveFromCart = useCallback((productId, size, color) => {
-    // Create a deep copy of the cart for optimistic update
-    const updatedCart = JSON.parse(JSON.stringify(localCart));
-    const productIndex = updatedCart.products.findIndex(
-      p => p.productId === productId && p.size === size && p.color === color
-    );
-    
-    if (productIndex !== -1) {
-      updatedCart.products.splice(productIndex, 1);
-      // Update total price
-      updatedCart.totalPrice = updatedCart.products.reduce(
-        (total, item) => total + (item.price * item.quantity), 0
-      );
-      setLocalCart(updatedCart);
-    }
-    
-    dispatch(removeFromCart({
-      productId,
-      guestId,
-      userId,
-      size,
-      color,
-    }))
-    .unwrap()
-    .then((data) => {
-      console.log("Item removed successfully:", data);
-      toast.success("Item removed from cart");
-    })
-    .catch((error) => {
-      console.error("Error removing item from cart:", error);
-      toast.error(error.message || "Failed to remove item from cart");
-      // Revert to original cart if removal fails
-      if (cartState.cart) {
-        setLocalCart(cartState.cart);
-      }
-    });
-  }, [localCart, dispatch, guestId, userId, cartState.cart]);
+  const handleRemoveFromCart = (productId,size,color) => {
+    dispatch(removeFromCart({ productId, size, color, userId, guestId }))
+  }
+
   return (
     <div className='p-4 bg-white rounded-lg overflow-auto'>
         <div className='flex-1 overflow-y-auto'>

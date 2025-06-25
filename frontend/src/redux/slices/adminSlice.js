@@ -7,7 +7,7 @@ export const fetchUsers = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosTokenInstance.get("/api/admin/users");
-      return response.data.users;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -19,7 +19,7 @@ export const addUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axiosTokenInstance.post("/api/admin/users", userData);
-      return response.data.user;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -31,7 +31,7 @@ export const updateUser = createAsyncThunk(
   async ({ userId, userData }, { rejectWithValue }) => {
     try {
       const response = await axiosTokenInstance.put(`/api/admin/users/${userId}`, userData);
-      return response.data.user;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }

@@ -70,17 +70,20 @@ const Navbar = () => {
           </Link>
         </div>
         <div className="flex items-center space-x-4">
+          {user && user.role === "admin" && (
           <Link to="/admin" className="bg-black text-white text-sm px-4 py-0.5 rounded hover:bg-gray-800">
             Admin
-          </Link>
+          </Link>)}
           <Link to="/profile" className="text-primary/90 hover:text-black">
             <HiOutlineUser className="h-5 w-5 inline-block" />
           </Link>
           <button onClick={toggleDrawer} className="relative text-primary/90 hover:text-black cursor-pointer">
             <HiOutlineShoppingCart className="h-5 w-5 inline-block" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-              {cartItemCount > 0 ? cartItemCount : 0}
-            </span>
+           {cartItemCount > 0 && (
+             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
+               {cartItemCount}
+             </span>
+           )}
           </button>
           <div className="overflow-hidden">
             <SearchBar />

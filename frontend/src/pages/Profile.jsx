@@ -3,7 +3,7 @@ import MyOrderPage from '../components/Products/MyOrderPage'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../redux/slices/authSlice';
-import { clearCart } from '../redux/slices/cartSlice';
+import { resetCart } from '../redux/slices/cartSlice';
 const Profile = () => {
   const {user} = useSelector((state) => state.auth);
   const navigate =useNavigate();
@@ -18,7 +18,7 @@ const Profile = () => {
   const handleLgout = () => {
     // Implement logout functionality here
     dispatch(logout());
-    dispatch(clearCart());
+    dispatch(resetCart());
     navigate('/login');
   }
   return (

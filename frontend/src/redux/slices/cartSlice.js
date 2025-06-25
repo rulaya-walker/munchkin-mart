@@ -1,15 +1,25 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance, axiosTokenInstance } from "../../axios/axiosInstance";
-import axios from "axios";
 
 // Helper function to get cart from localStorage
 const getCartFromStorage = () => {
-  const storeCart = localStorage.getItem("cart");
-  return storeCart ? JSON.parse(storeCart) : {products:[]};
+  try {
+    const storeCart = localStorage.getItem("cart");
+    return storeCart ? JSON.parse(storeCart) : {products:[], totalPrice: 0};
+  } catch (error) {
+    console.error("Error parsing cart from localStorage:", error);
+    return {products:[], totalPrice: 0};
+  }
 };
 
 const saveCartToStorage = (cart) => {
-  localStorage.setItem("cart", JSON.stringify(cart));
+  try {
+    if (cart) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+  } catch (error) {
+    console.error("Error saving cart to localStorage:", error);
+  }
 };
 
 
@@ -17,8 +27,6 @@ export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async ({userId, guestId}, { rejectWithValue }) => {
     try {
-      console.log("Fetching cart for:", { userId, guestId });
-      
       // Use axiosTokenInstance if userId exists (user is logged in)
       const axiosClient = userId ? axiosTokenInstance : axiosInstance;
       
@@ -26,7 +34,6 @@ export const fetchCart = createAsyncThunk(
         params: { userId, guestId }
       });
       
-      console.log("Cart fetch response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Cart fetch error:", error.response?.data || error.message);
@@ -104,7 +111,6 @@ export const removeFromCart = createAsyncThunk(
         data: { productId, userId, guestId, size, color }
       });
       
-      console.log("Remove from cart response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Remove from cart error:", error.response?.data || error.message);
@@ -118,13 +124,19 @@ export const mergeCarts = createAsyncThunk(
     "cart/mergeCarts",
     async ({ guestId, user }, { rejectWithValue }) => {
       try {
+        if (!guestId) {
+          console.error("No guestId provided for cart merge");
+          return rejectWithValue("No guest ID provided");
+        }
+        
         const response = await axiosTokenInstance.post(`/api/cart/merge`, {
           guestId,
           user
         });
         return response.data;
       } catch (error) {
-        return rejectWithValue(error.message);
+        console.error("Merge carts error:", error.response?.data || error.message);
+        return rejectWithValue(error.response?.data || { message: error.message });
       }
     }
 );
@@ -203,16 +215,18 @@ const cartSlice = createSlice({
       })
       .addCase(mergeCarts.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload;
-        saveCartToStorage(action.payload);
+        // Check if the response is the full cart object or contains a cart property
+        state.cart = action.payload?.cart || action.payload;
+        saveCartToStorage(state.cart);
       })
       .addCase(mergeCarts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || "Failed to merge carts";
+        state.error = action.payload?.message || action.error?.message || "Failed to merge carts";
+        console.error("Cart merge error in reducer:", state.error);
       });
   },
 });
 
-export const { clearCart } = cartSlice.actions;
+export const { resetCart } = cartSlice.actions;
 
 export default cartSlice.reducer;

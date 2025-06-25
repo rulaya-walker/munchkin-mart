@@ -18,9 +18,11 @@ import UserManagement from './components/Admin/UserManagement'
 import ProductManagement from './components/Admin/ProductManagement'
 import EditProduct from './components/Admin/EditProduct'
 import Orders from './components/Admin/Orders'
-import {Provider} from 'react-redux'
+import {Provider, useSelector} from 'react-redux'
 import store from './redux/store'
 import NetworkStatus from './components/Common/NetworkStatus'
+import ProtectedRoute from './components/Common/ProtectedRoute'
+
 
 const App = () => {
   return (
@@ -41,7 +43,7 @@ const App = () => {
           <Route path="/order/:id" element={<OrderDetails />} />
           <Route path="/my-orders" element={<MyOrderPage />} />
         </Route>
-        <Route path='/admin' element={<AdminLayout />}>
+        <Route path='/admin' element={<ProtectedRoute role='admin'><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminHome />} />
           <Route path='users' element={<UserManagement />} />
           <Route path='products' element={<ProductManagement />} />

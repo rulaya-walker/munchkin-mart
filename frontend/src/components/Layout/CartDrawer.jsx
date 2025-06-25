@@ -16,13 +16,16 @@ const CartDrawer = ({ drawerOpen, toggleDrawer }) => {
 
     useEffect(() => {
         if (drawerOpen) {
-            dispatch(fetchCart({userId, guestId}))
+            // Make sure we have a guestId for non-logged in users
+            const effectiveGuestId = !userId && !guestId ? `guest_${Date.now()}` : guestId;
+            
+            dispatch(fetchCart({userId, guestId: effectiveGuestId}))
                 .unwrap()
                 .then(response => {
-                    //console.log("Cart fetched successfully", response);
+                    console.log("Cart fetched successfully", response);
                 })
                 .catch(error => {
-                    //console.error("Failed to fetch cart", error);
+                    console.error("Failed to fetch cart", error);
                     // Don't show error toast for network errors when fetching cart
                     // as it would be too intrusive
                 });
@@ -39,7 +42,7 @@ const CartDrawer = ({ drawerOpen, toggleDrawer }) => {
     const handleCheckout = () => {
         toggleDrawer(); // Close the drawer
         if(!user){
-            navigate('/login?redirect=/checkout'); // Navigate to login if user is not logged in
+            navigate('/login?redirect=checkout'); // Navigate to login if user is not logged in
             return; // Stop further navigation
         }else{
             navigate('/checkout')

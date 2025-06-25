@@ -20,33 +20,26 @@ const Login = () => {
 
     const redirect = new URLSearchParams(location.search).get('redirect') || '/';
     const isCheckoutRedirect = redirect.includes('checkout');
-
     useEffect(() => {
       if(user){
-        const hasCartProducts = cart && cart.products && cart.products.length > 0;
-        if(hasCartProducts && guestId){
+        // If there's a guestId (which there should always be), attempt to merge carts
+        // This ensures we check for both situations - guest cart with items and possible user cart
+        if(guestId){
             dispatch(mergeCarts({guestId, user}))
-                .unwrap()
                 .then(() => {
-                    navigate(isCheckoutRedirect ? '/checkout' : "/");
+                    navigate(isCheckoutRedirect ? "/checkout" : "/");
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error("Error merging carts:", error);
-                    // Still navigate even if cart merging fails
-                    navigate(isCheckoutRedirect ? '/checkout' : "/");
+                    // Still navigate even if merge fails
+                    navigate(isCheckoutRedirect ? "/checkout" : "/");
                 });
         } else {
-            navigate(isCheckoutRedirect ? '/checkout' : "/");
+            navigate(isCheckoutRedirect ? "/checkout" : "/");
         }
       }  
-    }, [user, cart, guestId, isCheckoutRedirect, dispatch, navigate]);
+    }, [user, guestId, isCheckoutRedirect, dispatch, navigate]);
     
-    // Show errors from auth state
-    useEffect(() => {
-        if (error) {
-            toast.error(typeof error === 'string' ? error : 'Login failed. Please try again.');
-        }
-    }, [error]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

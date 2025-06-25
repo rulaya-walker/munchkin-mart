@@ -7,7 +7,7 @@ export const fetchAdminProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosTokenInstance.get("/api/admin/products");
-      return response.data.products;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -53,7 +53,7 @@ export const deleteProduct = createAsyncThunk(
 const adminProductSlice = createSlice({
   name: "adminProducts",
   initialState: {
-    products: [],
+    adminProducts: [],
     loading: false,
     error: null,
   },
@@ -66,7 +66,7 @@ const adminProductSlice = createSlice({
       })
       .addCase(fetchAdminProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        state.adminProducts = action.payload;
       })
       .addCase(fetchAdminProducts.rejected, (state, action) => {
         state.loading = false;
@@ -78,7 +78,7 @@ const adminProductSlice = createSlice({
       })
       .addCase(createProduct.fulfilled, (state, action) => {
         state.loading = false;
-        state.products.push(action.payload);
+        state.adminProducts.push(action.payload);
       })
       .addCase(createProduct.rejected, (state, action) => {
         state.loading = false;
@@ -90,9 +90,9 @@ const adminProductSlice = createSlice({
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.products.findIndex(product => product._id === action.payload._id);
+        const index = state.adminProducts.findIndex(product => product._id === action.payload._id);
         if (index !== -1) {
-          state.products[index] = action.payload;
+          state.adminProducts[index] = action.payload;
         }
       })
       .addCase(updateProduct.rejected, (state, action) => {
@@ -105,7 +105,7 @@ const adminProductSlice = createSlice({
       })
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = state.products.filter(product => product._id !== action.payload);
+        state.adminProducts = state.adminProducts.filter(product => product._id !== action.payload);
       })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.loading = false;
